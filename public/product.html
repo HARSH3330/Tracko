@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details — Tracko Parts</title>
+  <meta name="description" content="View detailed technical specifications, application compatibility, and request quotes for precision engine components.">
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages.css">
+</head>
+<body>
+  <div id="header-root"></div>
+
+  <section class="section" style="padding-top:var(--space-lg)">
+    <div class="container">
+      <div id="breadcrumb-root"></div>
+      <div id="product-content">
+        <!-- Loading skeleton -->
+        <div class="product-detail">
+          <div>
+            <div class="skeleton" style="aspect-ratio:1;border-radius:var(--radius-lg)"></div>
+          </div>
+          <div>
+            <div class="skeleton" style="height:20px;width:100px;margin-bottom:12px"></div>
+            <div class="skeleton" style="height:36px;width:80%;margin-bottom:16px"></div>
+            <div class="skeleton" style="height:80px;margin-bottom:24px"></div>
+            <div class="skeleton" style="height:100px;margin-bottom:24px"></div>
+            <div class="skeleton" style="height:44px;width:200px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" id="product-tabs" style="display:none">
+        <div class="tabs__nav">
+          <button class="tabs__btn active" onclick="switchTab('specs')">Specifications</button>
+          <button class="tabs__btn" onclick="switchTab('application')">Application</button>
+          <button class="tabs__btn" onclick="switchTab('description')">Description</button>
+        </div>
+        <div class="tabs__content">
+          <div class="tabs__panel active" id="tab-specs"></div>
+          <div class="tabs__panel" id="tab-application"></div>
+          <div class="tabs__panel" id="tab-description"></div>
+        </div>
+      </div>
+
+      <!-- Related Products -->
+      <div id="related-section" style="display:none;margin-top:var(--space-3xl)">
+        <div class="section__header">
+          <span class="section__subtitle">You May Also Like</span>
+          <h2 class="section__title">Related Products</h2>
+        </div>
+        <div id="related-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-root"></div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    document.getElementById('header-root').innerHTML = TrackoUI.renderHeader('products');
+    document.getElementById('footer-root').innerHTML = TrackoUI.renderFooter();
+    TrackoUI.initMobileMenu();
+
+    const slug = new URLSearchParams(window.location.search).get('slug');
+
+    async function loadProduct() {
+      if (!slug) {
+        document.getElementById('product-content').innerHTML =
+          '<p class="text-center" style="padding:var(--space-4xl)">Product not found. <a href="/products.html" style="color:var(--color-primary)">Browse all products →</a></p>';
+        return;
+      }
+
+      try {
+        const { product, related } = await TrackoAPI.getProduct(slug);
+
+        // Update page title & meta
+        document.title = product.meta_title || `${product.name} — Tracko Parts`;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.content = product.meta_description || product.short_description;
+
+        // Add structured data
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "description": product.short_description,
+          "brand": { "@type": "Brand", "name": "Tracko" },
+          "manufacturer": { "@type": "Organization", "name": "Tracko Parts" },
+          "category": product.category_name
+        };
+        const scriptEl = document.createElement('script');
+        scriptEl.type = 'application/ld+json';
+        scriptEl.textContent = JSON.stringify(schema);
+        document.head.appendChild(scriptEl);
+
+        // Breadcrumb
+        document.getElementById('breadcrumb-root').innerHTML = TrackoUI.renderBreadcrumb([
+          { label: 'Home', href: '/' },
+          { label: 'Products', href: '/products.html' },
+          { label: product.category_name || 'Category', href: `/products.html?category=${product.category_slug}` },
+          { label: product.name }
+        ]);
+
+        // Main content
+        const imgSrc = product.image_url || getPlaceholderImage(product.name);
+        const quickSpecs = [];
+        if (product.bore_diameter) quickSpecs.push({ label: 'Bore Diameter', value: `${product.bore_diameter} mm` });
+        if (product.material) quickSpecs.push({ label: 'Material', value: product.material });
+        if (product.engine_model) quickSpecs.push({ label: 'Engine Model', value: product.engine_model });
+        if (product.oem_number) quickSpecs.push({ label: 'OEM Number', value: product.oem_number });
+
+        document.getElementById('product-content').innerHTML = `
+          <div class="product-detail">
+            <div class="gallery">
+              <div class="gallery__main">
+                <img src="${sanitize(imgSrc)}" alt="${sanitize(product.name)}" id="main-image"
+                     onerror="this.src='${getPlaceholderImage(product.name)}'">
+              </div>
+            </div>
+            <div class="product-detail__info">
+              <span class="product-detail__category">${sanitize(product.category_name || '')}</span>
+              <h1 class="product-detail__title">${sanitize(product.name)}</h1>
+              <p class="product-detail__desc">${sanitize(product.short_description)}</p>
+
+              ${quickSpecs.length ? `
+              <div class="product-detail__meta">
+                ${quickSpecs.map(s => `
+                  <div class="product-detail__meta-item">
+                    <div class="product-detail__meta-label">${s.label}</div>
+                    <div class="product-detail__meta-value">${sanitize(s.value)}</div>
+                  </div>
+                `).join('')}
+              </div>` : ''}
+
+              ${product.brand ? `<p class="text-small text-muted">Brand: <strong>${sanitize(product.brand)}</strong></p>` : ''}
+
+              <div class="product-detail__actions">
+                <a href="/quote.html?product=${encodeURIComponent(product.name)}&id=${product.id}" class="btn btn--primary btn--lg">
+                  Request Quote
+                </a>
+                <a href="/contact.html" class="btn btn--outline btn--lg">Contact Sales</a>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Tabs content
+        document.getElementById('product-tabs').style.display = 'block';
+        document.getElementById('tab-specs').innerHTML = TrackoUI.renderSpecTable(product);
+
+        document.getElementById('tab-application').innerHTML = `
+          <div style="padding:var(--space-md) 0">
+            ${product.application ? `<p><strong>Compatible Vehicles:</strong> ${sanitize(product.application)}</p>` : ''}
+            ${product.engine_model ? `<p><strong>Engine Model:</strong> ${sanitize(product.engine_model)}</p>` : ''}
+            ${product.manufacturer ? `<p><strong>Manufacturer:</strong> ${sanitize(product.manufacturer)}</p>` : ''}
+            ${product.model ? `<p><strong>Model:</strong> ${sanitize(product.model)}</p>` : ''}
+            ${product.vehicle_type ? `<p><strong>Vehicle Type:</strong> ${sanitize(product.vehicle_type)}</p>` : ''}
+            ${product.year_range ? `<p><strong>Year Range:</strong> ${sanitize(product.year_range)}</p>` : ''}
+          </div>
+        `;
+
+        document.getElementById('tab-description').innerHTML = `
+          <div style="padding:var(--space-md) 0;line-height:var(--lh-loose);color:var(--color-text-light)">
+            ${sanitize(product.long_description || product.short_description || 'No detailed description available.')}
+          </div>
+        `;
+
+        // Related products
+        if (related && related.length) {
+          document.getElementById('related-section').style.display = 'block';
+          document.getElementById('related-grid').innerHTML = TrackoUI.renderProductGrid(related);
+          initScrollAnimations();
+        }
+
+      } catch (err) {
+        console.error('Failed to load product:', err);
+        document.getElementById('product-content').innerHTML =
+          '<p class="text-center" style="padding:var(--space-4xl)">Product not found. <a href="/products.html" style="color:var(--color-primary)">Browse all products →</a></p>';
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tabs__btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tabs__panel').forEach(panel => panel.classList.remove('active'));
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>

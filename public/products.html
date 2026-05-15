@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Catalog — Tracko Parts</title>
+  <meta name="description" content="Browse our complete catalog of precision engine pistons, piston rings, cylinder liners, and components. Filter by category, bore diameter, engine type, and material.">
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages.css">
+</head>
+<body>
+  <div id="header-root"></div>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Product Catalog</h1>
+      <p>Explore our complete range of precision engine components</p>
+    </div>
+  </section>
+
+  <!-- Catalog Content -->
+  <section class="section">
+    <div class="container">
+      <!-- Search Bar -->
+      <div style="margin-bottom:var(--space-xl);display:flex;justify-content:center">
+        <div class="search-bar" style="width:100%;max-width:700px">
+          <input type="text" class="search-bar__input" id="search-input" placeholder="Search by product name, OEM number, or engine model..." autocomplete="off">
+          <button class="search-bar__btn" id="search-btn" aria-label="Search" onclick="performSearch()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Filters -->
+      <div class="active-filters" id="active-filters"></div>
+
+      <!-- Mobile Filter Toggle -->
+      <button class="filter-toggle" id="filter-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Filters
+      </button>
+
+      <!-- Catalog Layout -->
+      <div class="catalog-layout">
+        <!-- Sidebar Filters -->
+        <aside class="catalog__sidebar" id="filter-sidebar">
+          <div class="filter-panel">
+            <div class="filter-panel__header">
+              <span>Filters</span>
+              <button class="filter-panel__clear" onclick="clearAllFilters()">Clear All</button>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-group" id="filter-category">
+              <div class="filter-group__title" onclick="toggleFilterGroup('filter-category')">
+                Category
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div class="filter-group__options" id="category-options">
+                <!-- Loaded via JS -->
+              </div>
+            </div>
+
+            <!-- Material Filter -->
+            <div class="filter-group" id="filter-material">
+              <div class="filter-group__title" onclick="toggleFilterGroup('filter-material')">
+                Material
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div class="filter-group__options" id="material-options"></div>
+            </div>
+
+            <!-- Engine Type Filter -->
+            <div class="filter-group" id="filter-engine">
+              <div class="filter-group__title" onclick="toggleFilterGroup('filter-engine')">
+                Engine Type
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div class="filter-group__options" id="engine-options"></div>
+            </div>
+
+            <!-- Bore Diameter Filter -->
+            <div class="filter-group" id="filter-bore">
+              <div class="filter-group__title" onclick="toggleFilterGroup('filter-bore')">
+                Bore Diameter (mm)
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div class="filter-group__options">
+                <div class="filter-range">
+                  <div class="filter-range__inputs">
+                    <input type="number" id="bore-min" placeholder="Min" onchange="applyFilters()">
+                    <span class="filter-range__separator">to</span>
+                    <input type="number" id="bore-max" placeholder="Max" onchange="applyFilters()">
+                    <span class="filter-range__separator">mm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vehicle Type Filter -->
+            <div class="filter-group" id="filter-application">
+              <div class="filter-group__title" onclick="toggleFilterGroup('filter-application')">
+                Application
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div class="filter-group__options" id="application-options"></div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Products Area -->
+        <main class="catalog__main">
+          <div class="catalog__toolbar">
+            <span class="catalog__count" id="product-count">Loading...</span>
+            <div class="catalog__sort">
+              <label>Sort by:</label>
+              <select id="sort-select" onchange="applyFilters()">
+                <option value="name">Name (A–Z)</option>
+                <option value="newest">Newest First</option>
+                <option value="bore_asc">Bore ↑</option>
+                <option value="bore_desc">Bore ↓</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="products-container">
+            <!-- Loaded via JS -->
+          </div>
+
+          <div id="pagination-container"></div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-root"></div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    // Render header & footer
+    document.getElementById('header-root').innerHTML = TrackoUI.renderHeader('products');
+    document.getElementById('footer-root').innerHTML = TrackoUI.renderFooter();
+    TrackoUI.initMobileMenu();
+
+    // State
+    let currentFilters = {};
+    let currentPage = 1;
+
+    // Initialize from URL params
+    function initFromUrl() {
+      const params = getUrlParams();
+      if (params.category) currentFilters.category = params.category;
+      if (params.material) currentFilters.material = params.material;
+      if (params.engine) currentFilters.engine = params.engine;
+      if (params.search) {
+        currentFilters.search = params.search;
+        document.getElementById('search-input').value = params.search;
+      }
+      if (params.bore_min) {
+        currentFilters.bore_min = params.bore_min;
+        document.getElementById('bore-min').value = params.bore_min;
+      }
+      if (params.bore_max) {
+        currentFilters.bore_max = params.bore_max;
+        document.getElementById('bore-max').value = params.bore_max;
+      }
+      if (params.sort) {
+        currentFilters.sort = params.sort;
+        document.getElementById('sort-select').value = params.sort;
+      }
+      if (params.page) currentPage = parseInt(params.page);
+    }
+
+    // Load filter options
+    async function loadFilters() {
+      try {
+        const [filtersData, catsData] = await Promise.all([
+          TrackoAPI.getFilters(),
+          TrackoAPI.getCategories()
+        ]);
+
+        // Category filter
+        const catOptions = document.getElementById('category-options');
+        catOptions.innerHTML = catsData.categories.map(cat => `
+          <label class="filter-option">
+            <input type="radio" name="category" value="${cat.slug}"
+              ${currentFilters.category === cat.slug ? 'checked' : ''}
+              onchange="setFilter('category', this.value)">
+            ${sanitize(cat.name)}
+            <span class="filter-option__count">${cat.product_count}</span>
+          </label>
+        `).join('');
+
+        // Material filter
+        const matOptions = document.getElementById('material-options');
+        matOptions.innerHTML = filtersData.materials.map(m => `
+          <label class="filter-option">
+            <input type="radio" name="material" value="${m}"
+              ${currentFilters.material === m ? 'checked' : ''}
+              onchange="setFilter('material', this.value)">
+            ${sanitize(m)}
+          </label>
+        `).join('');
+
+        // Engine filter
+        const engOptions = document.getElementById('engine-options');
+        engOptions.innerHTML = filtersData.engines.map(e => `
+          <label class="filter-option">
+            <input type="radio" name="engine" value="${e}"
+              ${currentFilters.engine === e ? 'checked' : ''}
+              onchange="setFilter('engine', this.value)">
+            ${sanitize(e)}
+          </label>
+        `).join('');
+
+        // Application filter
+        const appOptions = document.getElementById('application-options');
+        appOptions.innerHTML = filtersData.vehicle_types.map(v => `
+          <label class="filter-option">
+            <input type="radio" name="application" value="${v}"
+              ${currentFilters.application === v ? 'checked' : ''}
+              onchange="setFilter('application', this.value)">
+            ${sanitize(v)}
+          </label>
+        `).join('');
+
+      } catch (err) {
+        console.error('Failed to load filters:', err);
+      }
+    }
+
+    // Load products
+    async function loadProducts() {
+      try {
+        const params = {
+          ...currentFilters,
+          page: currentPage,
+          sort: document.getElementById('sort-select').value
+        };
+
+        const data = await TrackoAPI.getProducts(params);
+
+        document.getElementById('product-count').textContent =
+          `Showing ${data.products.length} of ${data.pagination.total} products`;
+
+        document.getElementById('products-container').innerHTML =
+          TrackoUI.renderProductGrid(data.products);
+
+        document.getElementById('pagination-container').innerHTML =
+          TrackoUI.renderPagination(data.pagination, 'goToPage');
+
+        updateActiveFilters();
+        setUrlParams({ ...currentFilters, page: currentPage > 1 ? currentPage : null });
+        initScrollAnimations();
+      } catch (err) {
+        console.error('Failed to load products:', err);
+        document.getElementById('products-container').innerHTML =
+          '<p class="text-center text-muted">Failed to load products. Please try again.</p>';
+      }
+    }
+
+    function setFilter(key, value) {
+      currentFilters[key] = value;
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function removeFilter(key) {
+      delete currentFilters[key];
+      // Uncheck radio buttons
+      const radios = document.querySelectorAll(`input[name="${key}"]`);
+      radios.forEach(r => r.checked = false);
+      if (key === 'bore_min') document.getElementById('bore-min').value = '';
+      if (key === 'bore_max') document.getElementById('bore-max').value = '';
+      if (key === 'search') document.getElementById('search-input').value = '';
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function clearAllFilters() {
+      currentFilters = {};
+      currentPage = 1;
+      document.querySelectorAll('.filter-group input').forEach(i => {
+        if (i.type === 'radio' || i.type === 'checkbox') i.checked = false;
+        else i.value = '';
+      });
+      document.getElementById('search-input').value = '';
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const boreMin = document.getElementById('bore-min').value;
+      const boreMax = document.getElementById('bore-max').value;
+      if (boreMin) currentFilters.bore_min = boreMin;
+      else delete currentFilters.bore_min;
+      if (boreMax) currentFilters.bore_max = boreMax;
+      else delete currentFilters.bore_max;
+      currentFilters.sort = document.getElementById('sort-select').value;
+      loadProducts();
+    }
+
+    function performSearch() {
+      const query = document.getElementById('search-input').value.trim();
+      if (query) currentFilters.search = query;
+      else delete currentFilters.search;
+      currentPage = 1;
+      loadProducts();
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      loadProducts();
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+
+    function toggleFilterGroup(id) {
+      document.getElementById(id).classList.toggle('collapsed');
+    }
+
+    function updateActiveFilters() {
+      const container = document.getElementById('active-filters');
+      const labels = { category: 'Category', material: 'Material', engine: 'Engine', application: 'Application', bore_min: 'Min Bore', bore_max: 'Max Bore', search: 'Search' };
+      const filterHtml = Object.entries(currentFilters)
+        .filter(([k]) => k !== 'sort' && k !== 'page')
+        .map(([key, val]) => `
+          <span class="active-filter">
+            ${labels[key] || key}: ${sanitize(val)}
+            <span class="active-filter__remove" onclick="removeFilter('${key}')">&times;</span>
+          </span>
+        `).join('');
+      container.innerHTML = filterHtml;
+    }
+
+    // Search on Enter
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') performSearch();
+    });
+
+    // Mobile filter toggle
+    document.getElementById('filter-toggle').addEventListener('click', () => {
+      document.getElementById('filter-sidebar').classList.toggle('show');
+    });
+
+    // Initialize
+    initFromUrl();
+    loadFilters();
+    loadProducts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Tracko Parts</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages.css">
+</head>
+<body>
+  <div id="header-root"></div>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <h3 style="margin-bottom:var(--space-lg);font-size:var(--fs-small);text-transform:uppercase;letter-spacing:var(--ls-wider);opacity:0.5">Dashboard</h3>
+      <nav class="admin-sidebar__nav">
+        <a class="admin-sidebar__link active" onclick="showSection('overview')" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </a>
+        <a class="admin-sidebar__link" onclick="showSection('products')" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Products
+        </a>
+        <a class="admin-sidebar__link" onclick="showSection('categories')" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22.54 12.43-1.96-.89L12.6 15.44a2 2 0 0 1-1.2 0l-7.98-3.9-1.96.89a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .26-1.84Z"/></svg>
+          Categories
+        </a>
+        <a class="admin-sidebar__link" onclick="showSection('inquiries')" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          Inquiries
+          <span id="inquiry-badge" class="badge badge--primary" style="margin-left:auto;display:none">0</span>
+        </a>
+        <a class="admin-sidebar__link" onclick="showSection('scraper')" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+          Scraper
+        </a>
+        <div style="margin-top:auto;padding-top:var(--space-xl);border-top:1px solid rgba(255,255,255,0.1)">
+          <a class="admin-sidebar__link" onclick="TrackoAPI.adminLogout()" href="#" style="opacity:0.7">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            Logout
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Overview Section -->
+      <div id="section-overview">
+        <h2 style="margin-bottom:var(--space-lg)">Dashboard Overview</h2>
+        <div class="admin-stats" id="stats-grid">
+          <div class="admin-stat-card">
+            <div class="admin-stat-card__value" id="stat-products">–</div>
+            <div class="admin-stat-card__label">Total Products</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-card__value" id="stat-categories">–</div>
+            <div class="admin-stat-card__label">Categories</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-card__value" id="stat-inquiries">–</div>
+            <div class="admin-stat-card__label">Total Inquiries</div>
+          </div>
+          <div class="admin-stat-card" style="border-left:3px solid var(--color-primary)">
+            <div class="admin-stat-card__value" id="stat-new" style="color:var(--color-primary)">–</div>
+            <div class="admin-stat-card__label">New Inquiries</div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-md)">Recent Inquiries</h3>
+        <div id="recent-inquiries-table"></div>
+      </div>
+
+      <!-- Products Section -->
+      <div id="section-products" style="display:none">
+        <div class="flex flex--between" style="margin-bottom:var(--space-lg)">
+          <h2>Manage Products</h2>
+        </div>
+        <div id="products-table"></div>
+      </div>
+
+      <!-- Categories Section -->
+      <div id="section-categories" style="display:none">
+        <div class="flex flex--between" style="margin-bottom:var(--space-lg)">
+          <h2>Manage Categories</h2>
+          <button class="btn btn--primary btn--sm" onclick="showAddCategory()">+ Add Category</button>
+        </div>
+
+        <!-- Add Category Form -->
+        <div id="add-category-form" style="display:none;margin-bottom:var(--space-xl)">
+          <div class="card" style="padding:var(--space-lg)">
+            <h3 style="margin-bottom:var(--space-md)">Add New Category</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Category Name *</label>
+                <input type="text" class="form-input" id="new-cat-name" placeholder="e.g., Crankshafts">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-input" id="new-cat-desc" placeholder="Brief description...">
+              </div>
+            </div>
+            <div style="display:flex;gap:var(--space-sm)">
+              <button class="btn btn--primary btn--sm" onclick="addCategory()">Save Category</button>
+              <button class="btn btn--outline btn--sm" onclick="document.getElementById('add-category-form').style.display='none'">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="categories-table"></div>
+      </div>
+
+      <!-- Inquiries Section -->
+      <div id="section-inquiries" style="display:none">
+        <h2 style="margin-bottom:var(--space-lg)">All Inquiries</h2>
+        <div id="inquiries-table"></div>
+      </div>
+
+      <!-- Scraper Section -->
+      <div id="section-scraper" style="display:none">
+        <h2 style="margin-bottom:var(--space-lg)">Web Scraper</h2>
+        <div class="card" style="padding:var(--space-xl)">
+          <h3 style="margin-bottom:var(--space-sm)">Scrape Products</h3>
+          <p class="text-small text-muted" style="margin-bottom:var(--space-lg)">
+            Fetch product data from <strong>trackoparts.com</strong>. The scraper will discover product pages, parse specifications, and import new products into the database. Existing products (matched by slug) will be skipped.
+          </p>
+          <button class="btn btn--primary" id="scrape-btn" onclick="triggerScrape()">
+            🔍 Start Scraping
+          </button>
+          <div id="scrape-status" style="margin-top:var(--space-lg);display:none">
+            <div class="badge badge--success">Scraping started — check server logs for progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Product Modal -->
+      <div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:var(--z-modal);background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center">
+        <div class="card" style="max-width:600px;width:90%;max-height:80vh;overflow-y:auto;padding:var(--space-xl)">
+          <div class="flex flex--between" style="margin-bottom:var(--space-lg)">
+            <h3>Edit Product</h3>
+            <button onclick="closeEditModal()" style="font-size:1.5rem">&times;</button>
+          </div>
+          <form id="edit-form" onsubmit="saveProductEdit(event)">
+            <input type="hidden" id="edit-id">
+            <div class="form-group">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-input" id="edit-name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Short Description</label>
+              <textarea class="form-textarea" id="edit-short-desc" style="min-height:80px"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Material</label>
+                <input type="text" class="form-input" id="edit-material">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bore Diameter (mm)</label>
+                <input type="number" step="0.1" class="form-input" id="edit-bore">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Engine Model</label>
+                <input type="text" class="form-input" id="edit-engine">
+              </div>
+              <div class="form-group">
+                <label class="form-label">OEM Number</label>
+                <input type="text" class="form-input" id="edit-oem">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">
+                <input type="checkbox" id="edit-featured" style="width:auto;margin-right:8px">
+                Featured Product
+              </label>
+            </div>
+            <div style="display:flex;gap:var(--space-sm)">
+              <button type="submit" class="btn btn--primary btn--sm">Save Changes</button>
+              <button type="button" class="btn btn--outline btn--sm" onclick="closeEditModal()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="footer-root"></div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    document.getElementById('header-root').innerHTML = TrackoUI.renderHeader('');
+    document.getElementById('footer-root').innerHTML = TrackoUI.renderFooter();
+    TrackoUI.initMobileMenu();
+
+    let allProducts = [];
+
+    // Section navigation
+    function showSection(name) {
+      document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+      document.getElementById(`section-${name}`).style.display = 'block';
+      document.querySelectorAll('.admin-sidebar__link').forEach(l => l.classList.remove('active'));
+      event.target.closest('.admin-sidebar__link').classList.add('active');
+
+      if (name === 'products') loadAdminProducts();
+      if (name === 'categories') loadAdminCategories();
+      if (name === 'inquiries') loadAdminInquiries();
+    }
+
+    // Load dashboard stats
+    async function loadStats() {
+      try {
+        const stats = await TrackoAPI.getStats();
+        document.getElementById('stat-products').textContent = stats.totalProducts;
+        document.getElementById('stat-categories').textContent = stats.totalCategories;
+        document.getElementById('stat-inquiries').textContent = stats.totalInquiries;
+        document.getElementById('stat-new').textContent = stats.newInquiries;
+
+        if (stats.newInquiries > 0) {
+          const badge = document.getElementById('inquiry-badge');
+          badge.textContent = stats.newInquiries;
+          badge.style.display = 'inline-flex';
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    // Load recent inquiries
+    async function loadRecentInquiries() {
+      try {
+        const { inquiries } = await TrackoAPI.getInquiries({ limit: 5 });
+        document.getElementById('recent-inquiries-table').innerHTML = renderInquiriesTable(inquiries);
+      } catch (err) { console.error(err); }
+    }
+
+    // Products table
+    async function loadAdminProducts() {
+      try {
+        const { products } = await TrackoAPI.getProducts({ limit: 100 });
+        allProducts = products;
+        document.getElementById('products-table').innerHTML = `
+          <table class="admin-table">
+            <thead><tr>
+              <th>Name</th><th>Category</th><th>Bore</th><th>Material</th><th>Featured</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${products.map(p => `
+                <tr>
+                  <td><strong>${sanitize(p.name)}</strong></td>
+                  <td>${sanitize(p.category_name || '—')}</td>
+                  <td>${p.bore_diameter ? p.bore_diameter + 'mm' : '—'}</td>
+                  <td>${sanitize(p.material || '—')}</td>
+                  <td>${p.is_featured ? '<span class="badge badge--primary">Yes</span>' : '—'}</td>
+                  <td>
+                    <button class="btn btn--sm btn--outline" onclick="openEditModal(${p.id})" style="padding:4px 12px;font-size:var(--fs-xs)">Edit</button>
+                    <button class="btn btn--sm" onclick="deleteProduct(${p.id})" style="padding:4px 12px;font-size:var(--fs-xs);color:var(--color-primary)">Delete</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>`;
+      } catch (err) { console.error(err); }
+    }
+
+    // Categories table
+    async function loadAdminCategories() {
+      try {
+        const { categories } = await TrackoAPI.getCategories();
+        document.getElementById('categories-table').innerHTML = `
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Slug</th><th>Products</th><th>Description</th></tr></thead>
+            <tbody>
+              ${categories.map(c => `
+                <tr>
+                  <td><strong>${sanitize(c.name)}</strong></td>
+                  <td class="text-muted">${sanitize(c.slug)}</td>
+                  <td>${c.product_count}</td>
+                  <td class="text-muted">${sanitize((c.description || '').substring(0, 60))}...</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>`;
+      } catch (err) { console.error(err); }
+    }
+
+    // Inquiries table
+    async function loadAdminInquiries() {
+      try {
+        const { inquiries } = await TrackoAPI.getInquiries({ limit: 50 });
+        document.getElementById('inquiries-table').innerHTML = renderInquiriesTable(inquiries);
+      } catch (err) { console.error(err); }
+    }
+
+    function renderInquiriesTable(inquiries) {
+      if (!inquiries.length) return '<p class="text-muted">No inquiries yet.</p>';
+      return `
+        <table class="admin-table">
+          <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Company</th><th>Product</th><th>Status</th></tr></thead>
+          <tbody>
+            ${inquiries.map(i => `
+              <tr>
+                <td>${formatDate(i.created_at)}</td>
+                <td><strong>${sanitize(i.name)}</strong></td>
+                <td>${sanitize(i.email)}</td>
+                <td>${sanitize(i.company || '—')}</td>
+                <td>${sanitize(i.product_reference || i.product_name || '—')}</td>
+                <td>
+                  <select onchange="updateInquiryStatus(${i.id}, this.value)" style="padding:4px 8px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:var(--fs-xs)">
+                    <option value="new" ${i.status === 'new' ? 'selected' : ''}>New</option>
+                    <option value="read" ${i.status === 'read' ? 'selected' : ''}>Read</option>
+                    <option value="replied" ${i.status === 'replied' ? 'selected' : ''}>Replied</option>
+                    <option value="closed" ${i.status === 'closed' ? 'selected' : ''}>Closed</option>
+                  </select>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    // Add category
+    function showAddCategory() {
+      document.getElementById('add-category-form').style.display = 'block';
+    }
+
+    async function addCategory() {
+      const name = document.getElementById('new-cat-name').value.trim();
+      if (!name) return showToast('Category name is required', 'error');
+      try {
+        await TrackoAPI.addCategory({
+          name,
+          description: document.getElementById('new-cat-desc').value.trim()
+        });
+        showToast('Category added!', 'success');
+        document.getElementById('add-category-form').style.display = 'none';
+        document.getElementById('new-cat-name').value = '';
+        document.getElementById('new-cat-desc').value = '';
+        loadAdminCategories();
+        loadStats();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    // Edit product
+    function openEditModal(id) {
+      const p = allProducts.find(p => p.id === id);
+      if (!p) return;
+      document.getElementById('edit-id').value = p.id;
+      document.getElementById('edit-name').value = p.name;
+      document.getElementById('edit-short-desc').value = p.short_description || '';
+      document.getElementById('edit-material').value = p.material || '';
+      document.getElementById('edit-bore').value = p.bore_diameter || '';
+      document.getElementById('edit-engine').value = p.engine_model || '';
+      document.getElementById('edit-oem').value = p.oem_number || '';
+      document.getElementById('edit-featured').checked = !!p.is_featured;
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    async function saveProductEdit(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-id').value;
+      try {
+        await TrackoAPI.updateProduct(id, {
+          name: document.getElementById('edit-name').value,
+          short_description: document.getElementById('edit-short-desc').value,
+          material: document.getElementById('edit-material').value,
+          bore_diameter: parseFloat(document.getElementById('edit-bore').value) || null,
+          engine_model: document.getElementById('edit-engine').value,
+          oem_number: document.getElementById('edit-oem').value,
+          is_featured: document.getElementById('edit-featured').checked ? 1 : 0
+        });
+        showToast('Product updated!', 'success');
+        closeEditModal();
+        loadAdminProducts();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      try {
+        await TrackoAPI.deleteProduct(id);
+        showToast('Product deleted', 'info');
+        loadAdminProducts();
+        loadStats();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    // Scraper
+    async function triggerScrape() {
+      const btn = document.getElementById('scrape-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Starting scraper...';
+      try {
+        await TrackoAPI.triggerScrape();
+        document.getElementById('scrape-status').style.display = 'block';
+        btn.textContent = '✓ Scraper Running';
+        showToast('Scraper started — check server console for progress', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '🔍 Start Scraping';
+      }
+    }
+
+    // Inquiry status
+    async function updateInquiryStatus(id, status) {
+      try {
+        await TrackoAPI.updateInquiryStatus(id, status);
+        showToast('Status updated', 'success');
+        loadStats();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    // Auth guard — redirect if not logged in
+    if (!TrackoAPI.checkAdminAuth()) {
+      // checkAdminAuth() already redirects, stop executing
+    } else {
+      // Init
+      loadStats();
+      loadRecentInquiries();
+    }
+  </script>
+</body>
+</html>

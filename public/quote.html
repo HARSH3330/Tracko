@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Quote — Tracko Parts</title>
+  <meta name="description" content="Request a quote for precision engine pistons, piston rings, cylinder liners, and components. Fast response within 24 hours.">
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages.css">
+</head>
+<body>
+  <div id="header-root"></div>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>Request a Quote</h1>
+      <p>Tell us what you need and we'll get back to you within 24 hours</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="quote-page">
+        <div class="quote-form-card">
+          <div class="success-message" id="quote-success">
+            ✓ Thank you! Your quote request has been submitted successfully. Our team will review your requirements and respond within 24 hours.
+          </div>
+
+          <form id="quote-form" onsubmit="submitQuoteForm(event)">
+            <h3 style="margin-bottom:var(--space-lg)">Your Details</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="quote-name">Full Name *</label>
+                <input type="text" class="form-input" id="quote-name" required placeholder="Your full name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="quote-email">Email Address *</label>
+                <input type="email" class="form-input" id="quote-email" required placeholder="you@company.com">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="quote-company">Company Name</label>
+                <input type="text" class="form-input" id="quote-company" placeholder="Company name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="quote-country">Country *</label>
+                <select class="form-select" id="quote-country" required>
+                  <option value="">Select Country</option>
+                  <option value="India">India</option>
+                  <option value="United States">United States</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Germany">Germany</option>
+                  <option value="UAE">United Arab Emirates</option>
+                  <option value="Brazil">Brazil</option>
+                  <option value="South Africa">South Africa</option>
+                  <option value="Nigeria">Nigeria</option>
+                  <option value="Turkey">Turkey</option>
+                  <option value="Egypt">Egypt</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Indonesia">Indonesia</option>
+                  <option value="Kenya">Kenya</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="margin-bottom:var(--space-lg)">Product Requirements</h3>
+            <div class="form-group">
+              <label class="form-label" for="quote-product">Product Reference</label>
+              <input type="text" class="form-input" id="quote-product" placeholder="e.g., Aluminum Engine Piston 87mm or OEM: 13101-30080">
+              <p class="form-hint">Enter the product name, OEM number, or part description</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="quote-message">Detailed Requirements *</label>
+              <textarea class="form-textarea" id="quote-message" required placeholder="Please describe your requirements including:&#10;&#10;• Product type and specifications&#10;• Quantity needed&#10;• Any specific OEM cross-references&#10;• Delivery timeline&#10;• Custom branding requirements (if any)" style="min-height:160px"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--lg" id="quote-submit" style="width:100%">
+              Submit Quote Request
+            </button>
+          </form>
+        </div>
+
+        <div style="margin-top:var(--space-2xl);text-align:center">
+          <p class="text-small text-muted">
+            Need immediate assistance? Call us at <a href="tel:+911234567890" style="color:var(--color-primary);font-weight:var(--fw-semibold)">+91 123 456 7890</a>
+            or email <a href="mailto:sales@trackoparts.com" style="color:var(--color-primary);font-weight:var(--fw-semibold)">sales@trackoparts.com</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-root"></div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    document.getElementById('header-root').innerHTML = TrackoUI.renderHeader('');
+    document.getElementById('footer-root').innerHTML = TrackoUI.renderFooter();
+    TrackoUI.initMobileMenu();
+
+    // Pre-fill product from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productRef = urlParams.get('product');
+    const productId = urlParams.get('id');
+    if (productRef) {
+      document.getElementById('quote-product').value = productRef;
+    }
+
+    async function submitQuoteForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById('quote-submit');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        await TrackoAPI.submitInquiry({
+          name: document.getElementById('quote-name').value,
+          email: document.getElementById('quote-email').value,
+          company: document.getElementById('quote-company').value,
+          country: document.getElementById('quote-country').value,
+          message: document.getElementById('quote-message').value,
+          product_id: productId || null,
+          product_reference: document.getElementById('quote-product').value
+        });
+
+        document.getElementById('quote-form').style.display = 'none';
+        document.getElementById('quote-success').classList.add('show');
+        showToast('Quote request submitted successfully!', 'success');
+      } catch (err) {
+        showToast(err.message || 'Failed to submit. Please try again.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Submit Quote Request';
+      }
+    }
+  </script>
+</body>
+</html>
