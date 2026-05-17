@@ -40,8 +40,9 @@ const TrackoUI = {
             <span style="opacity:0.3">|</span>
             ${this.icons.phone} <a href="tel:+911234567890">+91 123 456 7890</a>
           </div>
-          <div class="header__top-links">
-            ${this.icons.globe} Exporting to 40+ Countries
+          <div class="header__top-links" style="gap:var(--space-lg)">
+            <span style="display:flex;align-items:center;gap:6px">${this.icons.globe} Exporting to 40+ Countries</span>
+            ${typeof TrackoI18n !== 'undefined' ? TrackoI18n.renderSwitcher() : ''}
           </div>
         </div>
       </div>

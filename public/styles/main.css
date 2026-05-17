@@ -2,7 +2,7 @@
    TRACKO — Global Styles
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Reset */
 *, *::before, *::after {
@@ -18,13 +18,15 @@ html {
 }
 
 body {
-  font-family: var(--font-primary);
+  font-family: var(--font-body);
   font-size: var(--fs-body);
   font-weight: var(--fw-regular);
   line-height: var(--lh-normal);
   color: var(--color-text);
   background-color: var(--color-bg);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 img {
@@ -58,10 +60,11 @@ input, textarea, select {
 
 /* ======== Typography ======== */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
   font-weight: var(--fw-bold);
   line-height: var(--lh-tight);
   letter-spacing: var(--ls-tight);
-  color: var(--color-dark);
+  color: var(--color-white);
 }
 
 h1 { font-size: var(--fs-h1); }
@@ -268,7 +271,7 @@ p { margin-bottom: var(--space-md); }
   display: block;
   font-weight: var(--fw-medium);
   font-size: var(--fs-small);
-  color: var(--color-dark);
+  color: var(--color-steel-900);
   margin-bottom: var(--space-sm);
 }
 
@@ -277,11 +280,11 @@ p { margin-bottom: var(--space-md); }
 .form-select {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-steel-300);
   border-radius: var(--radius-md);
   font-size: var(--fs-body);
   color: var(--color-text);
-  background: var(--color-bg);
+  background: var(--color-surface);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -430,7 +433,7 @@ p { margin-bottom: var(--space-md); }
 
 /* ======== Loading State ======== */
 .skeleton {
-  background: linear-gradient(90deg, var(--color-bg-alt) 25%, #eee 50%, var(--color-bg-alt) 75%);
+  background: linear-gradient(90deg, var(--color-gunmetal) 25%, var(--color-surface) 50%, var(--color-gunmetal) 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
   border-radius: var(--radius-md);

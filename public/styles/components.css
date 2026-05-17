@@ -7,9 +7,11 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  background: var(--color-bg);
+  background: rgba(15, 17, 21, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
-  transition: box-shadow var(--transition-base);
+  transition: box-shadow var(--transition-base), background var(--transition-base);
 }
 
 .header.scrolled {
@@ -59,10 +61,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  font-family: var(--font-heading);
   font-size: 1.5rem;
   font-weight: var(--fw-black);
   letter-spacing: var(--ls-tight);
-  color: var(--color-dark);
+  color: var(--color-white);
 }
 
 .header__logo span {
@@ -138,7 +141,7 @@
 .header__menu-toggle span {
   display: block;
   height: 2px;
-  background: var(--color-dark);
+  background: var(--color-steel-900);
   border-radius: 2px;
   transition: all var(--transition-base);
 }
@@ -280,14 +283,14 @@
 
 /* ======== Product Card ======== */
 .product-card {
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   transition: all var(--transition-base);
   display: flex;
   flex-direction: column;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-steel-300);
 }
 
 .product-card:hover {
@@ -300,7 +303,7 @@
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  background: var(--color-bg-alt);
+  background: var(--color-surface);
 }
 
 .product-card__image img {
@@ -361,7 +364,7 @@
 .product-card__name {
   font-size: var(--fs-body);
   font-weight: var(--fw-semibold);
-  color: var(--color-dark);
+  color: var(--color-white);
   margin-bottom: var(--space-sm);
   line-height: var(--lh-tight);
   display: -webkit-box;
@@ -398,7 +401,7 @@
 }
 
 .product-card__spec-value {
-  color: var(--color-dark);
+  color: var(--color-steel-900);
   font-weight: var(--fw-medium);
 }
 
@@ -471,9 +474,9 @@
 
 /* ======== Filter Panel ======== */
 .filter-panel {
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-steel-300);
   overflow: hidden;
 }
 
@@ -514,7 +517,7 @@
 .filter-group__title {
   font-size: var(--fs-small);
   font-weight: var(--fw-semibold);
-  color: var(--color-dark);
+  color: var(--color-white);
   margin-bottom: var(--space-sm);
   display: flex;
   align-items: center;
@@ -595,7 +598,7 @@
 
 /* ======== Category Card ======== */
 .category-card {
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -603,6 +606,7 @@
   text-align: center;
   cursor: pointer;
   position: relative;
+  border: 1px solid var(--color-steel-300);
 }
 
 .category-card:hover {
@@ -642,7 +646,7 @@
 .category-card__name {
   font-size: var(--fs-body);
   font-weight: var(--fw-semibold);
-  color: var(--color-dark);
+  color: var(--color-white);
   margin-bottom: var(--space-xs);
 }
 
@@ -674,14 +678,14 @@
 
 .spec-table th {
   width: 40%;
-  color: var(--color-gray);
+  color: var(--color-steel-700);
   font-weight: var(--fw-medium);
-  background: var(--color-bg-alt);
+  background: var(--color-surface);
 }
 
 .spec-table td {
   font-weight: var(--fw-semibold);
-  color: var(--color-dark);
+  color: var(--color-white);
 }
 
 /* ======== Image Gallery ======== */
@@ -766,3 +770,121 @@
   color: var(--color-gray);
   margin-bottom: var(--space-lg);
 }
+
+/* ======== Language Switcher ======== */
+.lang-switcher {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lang-switcher__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: rgba(255,255,255,0.8);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  letter-spacing: var(--ls-wide);
+}
+
+.lang-switcher__btn:hover,
+.lang-switcher.open .lang-switcher__btn {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--color-crimson);
+  color: #fff;
+}
+
+.lang-switcher__btn svg {
+  transition: transform var(--transition-fast);
+}
+
+.lang-switcher.open .lang-switcher__btn svg {
+  transform: rotate(180deg);
+}
+
+.lang-switcher__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--color-gunmetal);
+  border: 1px solid var(--color-steel-300);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  z-index: var(--z-dropdown);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.lang-switcher__dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.lang-dropdown__header {
+  padding: 10px 16px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wider);
+  color: var(--color-steel-700);
+  border-bottom: 1px solid var(--color-steel-300);
+}
+
+.lang-dropdown__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: var(--space-2);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-steel-900);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  text-align: left;
+  background: none;
+  border: none;
+  width: 100%;
+}
+
+.lang-option:hover {
+  background: var(--color-surface-alt);
+  color: #fff;
+}
+
+.lang-option.active {
+  color: var(--color-crimson);
+  background: var(--color-crimson-alpha);
+}
+
+.lang-option .lang-option__flag {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.lang-option svg {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+

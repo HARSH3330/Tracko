@@ -166,6 +166,15 @@
   text-align: center;
   position: relative;
   padding: var(--space-xl) var(--space-md);
+  background: var(--color-gunmetal);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-steel-300);
+  transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.process-step:hover {
+  border-color: var(--color-crimson);
+  transform: translateY(-4px);
 }
 
 .process-step__number {
@@ -186,6 +195,7 @@
 .process-step__title {
   font-size: var(--fs-body);
   font-weight: var(--fw-semibold);
+  color: var(--color-white);
   margin-bottom: var(--space-sm);
 }
 
@@ -229,11 +239,12 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-md);
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-steel-300);
   font-size: var(--fs-small);
   font-weight: var(--fw-medium);
+  color: var(--color-steel-900);
   transition: all var(--transition-fast);
 }
 
@@ -558,9 +569,10 @@
 
 .stat-box {
   padding: var(--space-xl);
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-steel-300);
 }
 
 .stat-box__value {
@@ -594,7 +606,8 @@
   gap: var(--space-md);
   padding: var(--space-lg);
   border-radius: var(--radius-lg);
-  background: var(--color-bg-alt);
+  background: var(--color-gunmetal);
+  border: 1px solid var(--color-steel-300);
   margin-bottom: var(--space-md);
 }
 
@@ -649,11 +662,11 @@
 }
 
 .quote-form-card {
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-xl);
   padding: var(--space-2xl);
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-steel-300);
 }
 
 /* ======== ADMIN PAGE ======== */
@@ -705,16 +718,17 @@
 }
 
 .admin-stat-card {
-  background: var(--color-bg);
+  background: var(--color-gunmetal);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-steel-300);
 }
 
 .admin-stat-card__value {
   font-size: 2rem;
   font-weight: var(--fw-black);
-  color: var(--color-dark);
+  color: var(--color-white);
 }
 
 .admin-stat-card__label {

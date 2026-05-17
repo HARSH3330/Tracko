@@ -1,96 +1,158 @@
 /* ========================================
    TRACKO — CSS Design Tokens / Variables
+   Premium Industrial Redesign
    ======================================== */
 
 :root {
-  /* Brand Colors */
-  --color-primary: #E63946;
-  --color-primary-dark: #C62828;
-  --color-primary-light: #FF6659;
-  --color-primary-alpha: rgba(230, 57, 70, 0.1);
+  /* ---- Brand / Accent ---- */
+  --color-crimson:       #C1121F;
+  --color-crimson-dark:  #9B0E18;
+  --color-crimson-alpha: rgba(193, 18, 31, 0.12);
+  --color-crimson-glow:  rgba(193, 18, 31, 0.25);
 
-  /* Neutrals */
-  --color-dark: #1F1F1F;
-  --color-dark-2: #2A2A2A;
-  --color-dark-3: #333333;
-  --color-gray: #666666;
-  --color-gray-light: #999999;
-  --color-border: #E0E0E0;
-  --color-bg-alt: #F5F5F5;
-  --color-bg: #FFFFFF;
-  --color-text: #222222;
-  --color-text-light: #555555;
+  /* ---- Dark Palette ---- */
+  --color-void:          #0A0C10;      /* Deepest background */
+  --color-graphite:      #0F1115;      /* Body background */
+  --color-gunmetal:      #1A1F29;      /* Card / elevated surface */
+  --color-surface:       #212736;      /* Input / panel surface */
+  --color-surface-alt:   #252B3A;      /* Hover surface */
 
-  /* Typography */
-  --font-primary: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', monospace;
+  /* ---- Steel Scale (greys) ---- */
+  --color-steel-900:     #A8AFB8;      /* Primary text on dark */
+  --color-steel-700:     #6B7385;      /* Secondary / muted text */
+  --color-steel-500:     #434B5C;      /* Borders, dividers */
+  --color-steel-300:     #2C3345;      /* Subtle borders */
+  --color-steel-100:     #1E2333;      /* Very subtle */
 
-  --fs-hero: clamp(2rem, 5vw, 3.25rem);
-  --fs-h1: clamp(1.75rem, 4vw, 2.5rem);
-  --fs-h2: clamp(1.5rem, 3vw, 2rem);
-  --fs-h3: 1.25rem;
-  --fs-body: 1rem;
-  --fs-small: 0.875rem;
-  --fs-xs: 0.75rem;
+  /* ---- Light surfaces (admin / forms) ---- */
+  --color-white:         #FFFFFF;
+  --color-off-white:     #F4F5F7;
+  --color-light-bg:      #ECEEF2;
 
-  --fw-regular: 400;
-  --fw-medium: 500;
-  --fw-semibold: 600;
-  --fw-bold: 700;
-  --fw-black: 900;
+  /* ---- Semantic ---- */
+  --color-text:          #D4D8E0;      /* Body text */
+  --color-text-muted:    #6B7385;      /* Secondary text */
+  --color-text-faint:    #434B5C;      /* Disabled / placeholder */
+  --color-border:        rgba(255,255,255,0.07);
+  --color-border-hover:  rgba(193, 18, 31, 0.4);
 
-  --lh-tight: 1.2;
-  --lh-normal: 1.6;
-  --lh-loose: 1.8;
+  /* ---- Functional ---- */
+  --color-success:       #22C55E;
+  --color-warning:       #F59E0B;
+  --color-error:         #EF4444;
 
-  --ls-tight: -0.02em;
-  --ls-normal: 0;
-  --ls-wide: 0.05em;
-  --ls-wider: 0.1em;
+  /* ---- Typography ---- */
+  --font-heading: 'Sora', 'Inter', -apple-system, sans-serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
-  /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
-  --space-4xl: 96px;
-  --space-5xl: 128px;
+  /* Type Scale — tighter, more industrial */
+  --fs-hero:   clamp(2.25rem, 4.5vw, 3.5rem);
+  --fs-h1:     clamp(1.875rem, 3.5vw, 2.75rem);
+  --fs-h2:     clamp(1.5rem, 2.5vw, 2rem);
+  --fs-h3:     1.25rem;
+  --fs-h4:     1.0625rem;
+  --fs-body:   1rem;
+  --fs-small:  0.875rem;
+  --fs-xs:     0.75rem;
+  --fs-label:  0.6875rem;
 
-  /* Layout */
-  --container-max: 1280px;
+  /* Weights */
+  --fw-regular:   400;
+  --fw-medium:    500;
+  --fw-semibold:  600;
+  --fw-bold:      700;
+  --fw-black:     800;
+
+  /* Line heights */
+  --lh-tight:   1.15;
+  --lh-snug:    1.35;
+  --lh-normal:  1.6;
+  --lh-loose:   1.75;
+
+  /* Letter spacing */
+  --ls-tightest: -0.03em;
+  --ls-tight:    -0.02em;
+  --ls-normal:   0;
+  --ls-wide:     0.05em;
+  --ls-wider:    0.08em;
+  --ls-widest:   0.12em;
+
+  /* ---- 8pt Spacing System ---- */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* Legacy aliases (keep for backward compat) */
+  --space-xs:  var(--space-1);
+  --space-sm:  var(--space-2);
+  --space-md:  var(--space-4);
+  --space-lg:  var(--space-6);
+  --space-xl:  var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+  --space-4xl: var(--space-24);
+  --space-5xl: var(--space-32);
+
+  /* ---- Layout ---- */
+  --container-max:    1280px;
   --container-narrow: 960px;
-  --container-wide: 1440px;
-  --sidebar-width: 280px;
-  --header-height: 72px;
+  --container-wide:   1440px;
+  --sidebar-width:    280px;
+  --header-height:    72px;
+  --topbar-height:    36px;
 
-  /* Borders & Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ---- Border Radius ---- */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-xl:   14px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.16);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 8px 25px rgba(0, 0, 0, 0.12);
+  /* ---- Shadows (dark-optimised) ---- */
+  --shadow-sm:   0 1px 4px rgba(0,0,0,0.4);
+  --shadow-md:   0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.6);
+  --shadow-xl:   0 16px 48px rgba(0,0,0,0.7);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-card-hover: 0 8px 28px rgba(0,0,0,0.6);
+  --shadow-crimson: 0 4px 20px rgba(193,18,31,0.3);
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 400ms ease;
-  --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ---- Transitions ---- */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+  --transition-spring: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-  /* Z-Index Scale */
+  /* ---- Z-Index ---- */
   --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-fixed: 300;
-  --z-overlay: 400;
-  --z-modal: 500;
+  --z-sticky:   200;
+  --z-fixed:    300;
+  --z-overlay:  400;
+  --z-modal:    500;
+
+  /* ---- Industrial texture ---- */
+  --texture-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+
+  /* ---- Legacy Mappings for Dark Theme ---- */
+  --color-bg:            var(--color-graphite);
+  --color-bg-alt:        var(--color-gunmetal);
+  --color-primary:       var(--color-crimson);
+  --color-primary-dark:  var(--color-crimson-dark);
+  --color-primary-alpha: var(--color-crimson-alpha);
+  --color-dark:          var(--color-void);
+  --color-dark-2:        var(--color-surface);
+  --color-gray:          var(--color-steel-700);
+  --color-gray-light:    var(--color-steel-500);
 }
