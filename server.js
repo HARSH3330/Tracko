@@ -4,8 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
-// Initialize database (creates tables on first run)
-const db = require('./database/db');
+const { initializeDatabase } = require('./database/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   message: { error: 'Too many requests, please try again later.' }
 });
@@ -30,10 +29,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'tracko2024';
 
-// Store valid tokens in memory (resets on server restart)
+// Store valid tokens in memory (resets on cold start — acceptable for admin panel)
 const validTokens = new Set();
 
-// Login endpoint
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
   if (username === ADMIN_USER && password === ADMIN_PASS) {
@@ -44,14 +42,12 @@ app.post('/api/admin/login', (req, res) => {
   res.status(401).json({ error: 'Invalid username or password' });
 });
 
-// Logout endpoint
 app.post('/api/admin/logout', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (token) validTokens.delete(token);
   res.json({ success: true });
 });
 
-// Auth middleware for admin routes
 function requireAdmin(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token || !validTokens.has(token)) {
@@ -66,7 +62,7 @@ app.use('/api/categories', require('./routes/categories'));
 app.use('/api/inquiries', require('./routes/inquiries'));
 app.use('/api/admin', requireAdmin, require('./routes/admin'));
 
-// SPA-style fallback for clean URLs
+// SPA fallback for product detail pages
 app.get('/products/:slug', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'product.html'));
 });
@@ -82,6 +78,21 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 Tracko server running at http://localhost:${PORT}\n`);
-});
+// ---- Startup ----
+// Initialize DB schema on cold start (idempotent IF NOT EXISTS)
+initializeDatabase()
+  .then(() => {
+    // Only listen on a port when running locally (not on Vercel)
+    if (process.env.VERCEL !== '1') {
+      app.listen(PORT, () => {
+        console.log(`\n🚀 Tracko server running at http://localhost:${PORT}\n`);
+      });
+    }
+  })
+  .catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+  });
+
+// Export for Vercel serverless
+module.exports = app;

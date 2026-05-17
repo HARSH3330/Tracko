@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
+const { getPool } = require('../database/db');
 
-// GET /api/categories — list all
-router.get('/', (req, res) => {
+// GET /api/categories — list all with product count
+router.get('/', async (req, res) => {
   try {
-    const categories = db.prepare(`
-      SELECT c.*, COUNT(p.id) as product_count
+    const db = getPool();
+    const result = await db.query(`
+      SELECT c.*, COUNT(p.id)::int AS product_count
       FROM categories c
       LEFT JOIN products p ON p.category_id = c.id
       GROUP BY c.id
       ORDER BY c.name
-    `).all();
-
-    res.json({ categories });
+    `);
+    res.json({ categories: result.rows });
   } catch (err) {
     console.error('Error fetching categories:', err);
     res.status(500).json({ error: 'Failed to fetch categories' });
@@ -21,13 +21,14 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/categories/:slug
-router.get('/:slug', (req, res) => {
+router.get('/:slug', async (req, res) => {
   try {
-    const category = db.prepare('SELECT * FROM categories WHERE slug = ?').get(req.params.slug);
-    if (!category) {
+    const db = getPool();
+    const result = await db.query('SELECT * FROM categories WHERE slug = $1', [req.params.slug]);
+    if (!result.rows.length) {
       return res.status(404).json({ error: 'Category not found' });
     }
-    res.json({ category });
+    res.json({ category: result.rows[0] });
   } catch (err) {
     console.error('Error fetching category:', err);
     res.status(500).json({ error: 'Failed to fetch category' });

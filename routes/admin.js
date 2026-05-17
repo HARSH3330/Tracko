@@ -1,19 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
+const { getPool } = require('../database/db');
 const slugify = require('slugify');
 
 // PUT /api/admin/products/:id — edit product
-router.put('/products/:id', (req, res) => {
+router.put('/products/:id', async (req, res) => {
   try {
-    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
-    if (!product) {
+    const db = getPool();
+    const check = await db.query('SELECT id FROM products WHERE id = $1', [req.params.id]);
+    if (!check.rows.length) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
     const fields = req.body;
     const updates = [];
     const params = [];
+    let idx = 1;
 
     const allowedFields = [
       'name', 'short_description', 'long_description', 'category_id',
@@ -26,23 +28,26 @@ router.put('/products/:id', (req, res) => {
 
     for (const field of allowedFields) {
       if (fields[field] !== undefined) {
-        updates.push(`${field} = ?`);
+        updates.push(`${field} = $${idx++}`);
         params.push(fields[field]);
       }
     }
 
     if (fields.name) {
-      updates.push('slug = ?');
+      updates.push(`slug = $${idx++}`);
       params.push(slugify(fields.name, { lower: true, strict: true }));
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
+    updates.push(`updated_at = NOW()`);
     params.push(req.params.id);
 
-    db.prepare(`UPDATE products SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+    await db.query(
+      `UPDATE products SET ${updates.join(', ')} WHERE id = $${idx}`,
+      params
+    );
 
-    const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
-    res.json({ success: true, product: updated });
+    const updated = await db.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
+    res.json({ success: true, product: updated.rows[0] });
   } catch (err) {
     console.error('Error updating product:', err);
     res.status(500).json({ error: 'Failed to update product' });
@@ -50,10 +55,14 @@ router.put('/products/:id', (req, res) => {
 });
 
 // DELETE /api/admin/products/:id
-router.delete('/products/:id', (req, res) => {
+router.delete('/products/:id', async (req, res) => {
   try {
-    const result = db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
-    if (result.changes === 0) {
+    const db = getPool();
+    const result = await db.query(
+      'DELETE FROM products WHERE id = $1 RETURNING id',
+      [req.params.id]
+    );
+    if (!result.rows.length) {
       return res.status(404).json({ error: 'Product not found' });
     }
     res.json({ success: true, message: 'Product deleted' });
@@ -64,56 +73,48 @@ router.delete('/products/:id', (req, res) => {
 });
 
 // POST /api/admin/categories — add category
-router.post('/categories', (req, res) => {
+router.post('/categories', async (req, res) => {
   try {
+    const db = getPool();
     const { name, description, image_url } = req.body;
     if (!name) {
       return res.status(400).json({ error: 'Category name is required' });
     }
 
     const slug = slugify(name, { lower: true, strict: true });
-    const existing = db.prepare('SELECT id FROM categories WHERE slug = ?').get(slug);
-    if (existing) {
+    const existing = await db.query('SELECT id FROM categories WHERE slug = $1', [slug]);
+    if (existing.rows.length) {
       return res.status(409).json({ error: 'Category already exists' });
     }
 
-    const result = db.prepare(
-      'INSERT INTO categories (name, slug, description, image_url) VALUES (?, ?, ?, ?)'
-    ).run(name, slug, description || '', image_url || '');
-
-    const category = db.prepare('SELECT * FROM categories WHERE id = ?').get(result.lastInsertRowid);
-    res.status(201).json({ success: true, category });
+    const result = await db.query(
+      'INSERT INTO categories (name, slug, description, image_url) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, slug, description || '', image_url || '']
+    );
+    res.status(201).json({ success: true, category: result.rows[0] });
   } catch (err) {
     console.error('Error creating category:', err);
     res.status(500).json({ error: 'Failed to create category' });
   }
 });
 
-// POST /api/admin/scrape — trigger scraper
+// POST /api/admin/scrape — trigger scraper (disabled on Vercel serverless)
 router.post('/scrape', async (req, res) => {
-  try {
-    const scraper = require('../scraper/scraper');
-    res.json({ success: true, message: 'Scraping started. Check server logs for progress.' });
-    // Run scraper asynchronously
-    scraper.run().then(result => {
-      console.log('Scraper finished:', result);
-    }).catch(err => {
-      console.error('Scraper error:', err);
-    });
-  } catch (err) {
-    console.error('Error triggering scraper:', err);
-    res.status(500).json({ error: 'Failed to start scraper' });
-  }
+  res.json({
+    success: false,
+    message: 'Scraper is not available in serverless mode. Run locally with: npm run scrape'
+  });
 });
 
-// PUT /api/admin/inquiries/:id/status — update inquiry status
-router.put('/inquiries/:id/status', (req, res) => {
+// PUT /api/admin/inquiries/:id/status
+router.put('/inquiries/:id/status', async (req, res) => {
   try {
+    const db = getPool();
     const { status } = req.body;
     if (!['new', 'read', 'replied', 'closed'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
-    db.prepare('UPDATE inquiries SET status = ? WHERE id = ?').run(status, req.params.id);
+    await db.query('UPDATE inquiries SET status = $1 WHERE id = $2', [status, req.params.id]);
     res.json({ success: true });
   } catch (err) {
     console.error('Error updating inquiry:', err);
@@ -122,14 +123,22 @@ router.put('/inquiries/:id/status', (req, res) => {
 });
 
 // GET /api/admin/stats — dashboard stats
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
-    const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products').get().count;
-    const totalCategories = db.prepare('SELECT COUNT(*) as count FROM categories').get().count;
-    const totalInquiries = db.prepare('SELECT COUNT(*) as count FROM inquiries').get().count;
-    const newInquiries = db.prepare("SELECT COUNT(*) as count FROM inquiries WHERE status = 'new'").get().count;
+    const db = getPool();
+    const [products, categories, inquiries, newInq] = await Promise.all([
+      db.query('SELECT COUNT(*)::int AS count FROM products'),
+      db.query('SELECT COUNT(*)::int AS count FROM categories'),
+      db.query('SELECT COUNT(*)::int AS count FROM inquiries'),
+      db.query("SELECT COUNT(*)::int AS count FROM inquiries WHERE status = 'new'"),
+    ]);
 
-    res.json({ totalProducts, totalCategories, totalInquiries, newInquiries });
+    res.json({
+      totalProducts:    products.rows[0].count,
+      totalCategories:  categories.rows[0].count,
+      totalInquiries:   inquiries.rows[0].count,
+      newInquiries:     newInq.rows[0].count,
+    });
   } catch (err) {
     console.error('Error fetching stats:', err);
     res.status(500).json({ error: 'Failed to fetch stats' });

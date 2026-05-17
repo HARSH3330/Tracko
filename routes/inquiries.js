@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
+const { getPool } = require('../database/db');
 
-// POST /api/inquiries — submit quote request
-router.post('/', (req, res) => {
+// POST /api/inquiries — submit quote/contact
+router.post('/', async (req, res) => {
   try {
+    const db = getPool();
     const { name, email, company, country, phone, message, product_id, product_reference } = req.body;
 
-    // Validation
     if (!name || !email || !message) {
       return res.status(400).json({ error: 'Name, email, and message are required.' });
     }
@@ -17,12 +17,11 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: 'Invalid email address.' });
     }
 
-    const stmt = db.prepare(`
+    const result = await db.query(`
       INSERT INTO inquiries (name, email, company, country, phone, message, product_id, product_reference)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = stmt.run(
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id
+    `, [
       name.trim(),
       email.trim(),
       (company || '').trim(),
@@ -31,12 +30,12 @@ router.post('/', (req, res) => {
       message.trim(),
       product_id || null,
       (product_reference || '').trim()
-    );
+    ]);
 
     res.status(201).json({
       success: true,
       message: 'Your inquiry has been submitted successfully. We will contact you shortly.',
-      id: result.lastInsertRowid
+      id: result.rows[0].id
     });
   } catch (err) {
     console.error('Error submitting inquiry:', err);
@@ -45,32 +44,48 @@ router.post('/', (req, res) => {
 });
 
 // GET /api/inquiries — admin: list all inquiries
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
+    const db = getPool();
     const { status, page = 1, limit = 20 } = req.query;
 
     let where = '';
     let params = [];
+
     if (status) {
-      where = 'WHERE i.status = ?';
+      where = 'WHERE i.status = $1';
       params.push(status);
     }
 
-    const total = db.prepare(`SELECT COUNT(*) as total FROM inquiries i ${where}`).get(...params).total;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const countResult = await db.query(
+      `SELECT COUNT(*)::int AS total FROM inquiries i ${where}`,
+      params
+    );
+    const total = countResult.rows[0].total;
 
-    const inquiries = db.prepare(`
-      SELECT i.*, p.name as product_name
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const dataParams = status
+      ? [status, parseInt(limit), offset]
+      : [parseInt(limit), offset];
+    const limitIdx = status ? 2 : 1;
+
+    const inquiries = await db.query(`
+      SELECT i.*, p.name AS product_name
       FROM inquiries i
       LEFT JOIN products p ON i.product_id = p.id
       ${where}
       ORDER BY i.created_at DESC
-      LIMIT ? OFFSET ?
-    `).all(...params, parseInt(limit), offset);
+      LIMIT $${limitIdx} OFFSET $${limitIdx + 1}
+    `, dataParams);
 
     res.json({
-      inquiries,
-      pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / parseInt(limit)) }
+      inquiries: inquiries.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
     });
   } catch (err) {
     console.error('Error fetching inquiries:', err);
