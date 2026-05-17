@@ -4,7 +4,6 @@
  * Requires DATABASE_URL env variable to be set.
  */
 
-require('dotenv').config({ path: '.env.local' });
 const { getPool, initializeDatabase } = require('./db');
 const slugify = require('slugify');
 
