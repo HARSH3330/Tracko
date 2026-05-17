@@ -4,17 +4,14 @@ const path = require('path');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
-const { initializeDatabase } = require('./database/db');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ---- Middleware ----
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
@@ -22,14 +19,12 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// Serve static frontend files
+// Serve static frontend files from /public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---- Admin Authentication ----
+// ---- Admin Auth ----
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'tracko2024';
-
-// Store valid tokens in memory (resets on cold start — acceptable for admin panel)
 const validTokens = new Set();
 
 app.post('/api/admin/login', (req, res) => {
@@ -56,43 +51,64 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// API Routes
-app.use('/api/products', require('./routes/products'));
-app.use('/api/categories', require('./routes/categories'));
-app.use('/api/inquiries', require('./routes/inquiries'));
-app.use('/api/admin', requireAdmin, require('./routes/admin'));
+// ---- DB Init Middleware (lazy — runs once on first API call) ----
+let dbReady = false;
+let dbError = null;
 
-// SPA fallback for product detail pages
+async function ensureDb(req, res, next) {
+  if (dbReady) return next();
+  if (dbError) return res.status(503).json({ error: 'Database unavailable. Check DATABASE_URL.', detail: dbError });
+
+  try {
+    const { initializeDatabase } = require('./database/db');
+    await initializeDatabase();
+    dbReady = true;
+    next();
+  } catch (err) {
+    dbError = err.message;
+    console.error('DB init failed:', err.message);
+    res.status(503).json({ error: 'Database unavailable. Check DATABASE_URL env var.', detail: err.message });
+  }
+}
+
+// ---- API Routes (DB required) ----
+app.use('/api/products',   ensureDb, require('./routes/products'));
+app.use('/api/categories', ensureDb, require('./routes/categories'));
+app.use('/api/inquiries',  ensureDb, require('./routes/inquiries'));
+app.use('/api/admin',      ensureDb, requireAdmin, require('./routes/admin'));
+
+// ---- Health check (no DB needed) ----
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', db: dbReady, timestamp: new Date().toISOString() });
+});
+
+// ---- SPA fallbacks ----
 app.get('/products/:slug', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'product.html'));
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Serve index.html for root and any unmatched HTML routes
+app.get('*', (req, res) => {
+  // Only serve index.html for non-file routes (no extension)
+  if (!path.extname(req.path)) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } else {
+    res.status(404).send('Not found');
+  }
 });
 
-// Error handler
+// ---- Error handler ----
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// ---- Startup ----
-// Initialize DB schema on cold start (idempotent IF NOT EXISTS)
-initializeDatabase()
-  .then(() => {
-    // Only listen on a port when running locally (not on Vercel)
-    if (process.env.VERCEL !== '1') {
-      app.listen(PORT, () => {
-        console.log(`\n🚀 Tracko server running at http://localhost:${PORT}\n`);
-      });
-    }
-  })
-  .catch(err => {
-    console.error('Failed to initialize database:', err);
-    process.exit(1);
+// ---- Local dev only — don't listen on Vercel ----
+if (process.env.VERCEL !== '1' && require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Tracko running at http://localhost:${PORT}\n`);
   });
+}
 
 // Export for Vercel serverless
 module.exports = app;
